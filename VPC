@@ -91,3 +91,191 @@ Create Resources:-
    ]
 }
 ```
+You might want to control which VPC resources users can modify or delete
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "ec2:DeleteInternetGateway",
+            "Resource": "arn:aws:ec2:*:*:internet-gateway/*",
+            "Condition": {
+                "StringEquals": {
+                    "ec2:ResourceTag/Purpose": "Test"
+                }
+            }
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DeleteRouteTable",
+                "ec2:CreateRoute",
+                "ec2:ReplaceRoute",
+                "ec2:DeleteRoute"
+            ],
+            "Resource": "arn:aws:ec2:*:*:route-table/*",
+            "Condition": {
+                "StringEquals": {
+                    "ec2:ResourceTag/Purpose": "Test"
+                }
+            }
+        }
+    ]
+}
+```
+Delete Security Group by Tag - Stack=test
+```
+{
+   "Version": "2012-10-17",
+   "Statement": [{
+      "Effect": "Allow",
+      "Action": [
+         "ec2:DescribeSecurityGroups", 
+         "ec2:DescribeSecurityGroupRules", 
+         "ec2:DescribeVpcs"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+         "ec2:AuthorizeSecurityGroupIngress",
+         "ec2:RevokeSecurityGroupIngress",
+         "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
+         "ec2:AuthorizeSecurityGroupEgress",
+         "ec2:RevokeSecurityGroupEgress",
+         "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
+         "ec2:ModifySecurityGroupRules",
+         "ec2:DeleteSecurityGroup" 
+      ],
+      "Resource": "arn:aws:ec2:*:*:security-group/*",
+      "Condition":{
+         "StringEquals": {
+            "ec2:ResourceTag/Stack": "test"
+         }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+         "ec2:CreateSecurityGroup"
+      ],
+      "Resource": "arn:aws:ec2:*:*:security-group/*",
+      "Condition": {
+         "StringEquals": {
+           "aws:RequestTag/Stack": "test"
+         },
+         "ForAllValues:StringEquals": {
+           "aws:TagKeys": ["Stack"]
+         }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+         "ec2:CreateTags"
+      ],
+      "Resource": "arn:aws:ec2:*:*:security-group/*",
+      "Condition": {
+        "StringEquals": {
+           "ec2:CreateAction" : "CreateSecurityGroup"
+        }
+      }
+    }
+  ]
+}	
+```
+Manage security group rules
+```
+{
+  "Version": "2012-10-17",
+  "Statement":[{
+    "Effect":"Allow",
+    "Action": [
+       "ec2:AuthorizeSecurityGroupIngress",
+       "ec2:RevokeSecurityGroupIngress",
+       "ec2:UpdateSecurityGroupRuleDescriptionsIngress",
+       "ec2:AuthorizeSecurityGroupEgress",
+       "ec2:RevokeSecurityGroupEgress",
+       "ec2:UpdateSecurityGroupRuleDescriptionsEgress",
+       "ec2:ModifySecurityGroupRules"
+    ],
+     "Resource": "arn:aws:ec2:region:account-id:security-group/*",
+      "Condition": {
+        "ArnEquals": {
+          "ec2:Vpc": "arn:aws:ec2:region:account-id:vpc/vpc-id"
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+          "ec2:DescribeSecurityGroups",
+          "ec2:DescribeSecurityGroupRules",
+          "ec2:DescribeTags"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+Launch instances into a specific subnet
+```
+{
+   "Version": "2012-10-17",
+   "Statement": [{
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": [
+        "arn:aws:ec2:region::image/ami-*",
+        "arn:aws:ec2:region:account:instance/*",
+        "arn:aws:ec2:region:account:subnet/subnet-id",
+        "arn:aws:ec2:region:account:network-interface/*",
+        "arn:aws:ec2:region:account:volume/*",
+        "arn:aws:ec2:region:account:key-pair/*",
+        "arn:aws:ec2:region:account:security-group/sg-id"
+      ]
+    }
+   ]
+}
+```
+Launch instances into a specific VPC
+```
+{
+   "Version": "2012-10-17",
+   "Statement": [{
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": "arn:aws:ec2:region:account-id:subnet/*",
+        "Condition": {
+         "ArnEquals": {
+            "ec2:Vpc": "arn:aws:ec2:region:account-id:vpc/vpc-id"
+         }
+      }
+   },
+   {
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": "arn:aws:ec2:region::image/ami-*",
+      "Condition": {
+         "StringEquals": {
+            "ec2:ResourceTag/department": "dev"
+            }
+      }
+   },
+   {
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": [ 
+         "arn:aws:ec2:region:account:instance/*",
+         "arn:aws:ec2:region:account:volume/*",
+         "arn:aws:ec2:region:account:network-interface/*",
+         "arn:aws:ec2:region:account:key-pair/*",
+         "arn:aws:ec2:region:account:security-group/*"
+         ]
+      }
+   ]
+}
+```
