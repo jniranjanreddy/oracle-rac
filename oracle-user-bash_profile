@@ -1,0 +1,27 @@
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+        . ~/.bashrc
+fi
+
+# User specific environment and startup programs
+
+PATH=$PATH:$HOME/.local/bin:$HOME/bin
+
+export PATH
+# Grid Settings
+#export TMP=/tmp
+#export TMPDIR=$TMP
+export ORACLE_BASE=/u01/app/oracle
+export GRID_HOME=/u01/app/19c/grid
+export DB_HOME=$ORACLE_BASE/product/19c/db_1
+export ORACLE_HOME=$DB_HOME
+export ORACLE_SID=racdb1
+export ORACLE_TERM=xterm
+export BASE_PATH=/usr/sbin/:$PATH
+export PATH=$ORACLE_HOME/bin:$BASE_PATH
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:/lib:/usr/lib
+export CLASSPATH=$ORACLE_HOME/JRE:$ORACLE_HOME/jlib:$ORACLE_HOME/rdbms/jlib
+alias grid='. /home/oracle/grid.env'
+alias db='. /home/oracle/db.env'
